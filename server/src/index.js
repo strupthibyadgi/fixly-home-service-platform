@@ -1,0 +1,15 @@
+import 'dotenv/config';
+import 'express-async-errors';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import User from './models/User.js';
+import Service from './models/Service.js';
+import api from './routes/api.js';
+const app=express();app.use(helmet());app.use(cors({origin:(origin,callback)=>{const localOrigin=!origin||/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);const configuredOrigin=process.env.CLIENT_URL||'http://localhost:5173';if(localOrigin||origin===configuredOrigin)return callback(null,true);return callback(new Error(`CORS blocked origin: ${origin}`));}}));app.use(express.json({limit:'1mb'}));app.use(morgan('dev'));
+app.get('/api/health',(req,res)=>res.json({ok:true,service:'Home Service Platform API'}));app.use('/api',api);app.use((req,res)=>res.status(404).json({message:'Route not found.'}));app.use((err,req,res,next)=>{console.error(err);if(err.code===11000)return res.status(409).json({message:'That email is already registered.'});if(err.name==='ValidationError')return res.status(400).json({message:err.message});res.status(500).json({message:'Something went wrong. Please try again.'});});
+const seed=async()=>{if(!await Service.exists()){await Service.insertMany([{name:'Electrician',category:'Electrician',description:'Electrical installation and repair',price:500,durationMinutes:60},{name:'Plumber',category:'Plumbing',description:'Pipe fitting and leakage repairs',price:400,durationMinutes:60},{name:'Carpenter',category:'Carpentry',description:'Furniture repair and woodwork',price:600,durationMinutes:90},{name:'Painter',category:'Painting',description:'Interior and exterior painting',price:700,durationMinutes:120},{name:'AC Repair',category:'Appliance Repair',description:'AC installation and servicing',price:800,durationMinutes:90},{name:'Home Cleaning',category:'Cleaning',description:'Deep home cleaning services',price:1000,durationMinutes:120}]);console.log('Sample services added.');}if(process.env.ADMIN_EMAIL&&process.env.ADMIN_PASSWORD&&!await User.exists({email:process.env.ADMIN_EMAIL.toLowerCase()})){await User.create({name:process.env.ADMIN_NAME||'Platform Admin',email:process.env.ADMIN_EMAIL,password:await bcrypt.hash(process.env.ADMIN_PASSWORD,12),role:'admin',approved:true});console.log('Admin account created from environment.');}};
+const start=async()=>{if(!process.env.MONGODB_URI||!process.env.JWT_SECRET)throw new Error('Set MONGODB_URI and JWT_SECRET in server/.env');await mongoose.connect(process.env.MONGODB_URI);await seed();const port=process.env.PORT||5001;app.listen(port,()=>console.log(`API ready at http://localhost:${port}`));};start().catch(err=>{console.error(err);process.exit(1);});

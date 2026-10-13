@@ -1,0 +1,3 @@
+import mongoose from 'mongoose';
+const bookingSchema=new mongoose.Schema({ customer:{type:mongoose.Schema.Types.ObjectId,ref:'User',required:true}, provider:{type:mongoose.Schema.Types.ObjectId,ref:'User'}, service:{type:mongoose.Schema.Types.ObjectId,ref:'Service',required:true}, scheduledAt:{type:Date,required:true}, address:{type:String,required:true}, phone:{type:String,required:true}, notes:String, status:{type:String,enum:['requested','accepted','in_progress','completed','cancelled'],default:'requested'}, price:{type:Number,required:true}, statusHistory:[{status:String,by:{type:mongoose.Schema.Types.ObjectId,ref:'User'},at:{type:Date,default:Date.now},note:String}] },{timestamps:true});
+export default mongoose.model('Booking',bookingSchema);
