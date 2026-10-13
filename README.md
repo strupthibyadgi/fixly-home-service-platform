@@ -30,7 +30,9 @@ For a new GitHub repository, create an empty repository, then from this project 
 
 The repository includes `server/Dockerfile`, `client/Dockerfile`, `client/nginx.conf`, `docker-compose.yml`, and `Jenkinsfile`. Compose runs MongoDB, the Express API, and the built React site. Create `server/.env` as described above, then run `docker compose up --build`; open `http://localhost:8081` (the API is also available at `http://localhost:5001/api/health`). The Compose file overrides `MONGODB_URI` inside the API container to use the `mongo` service. MongoDB data persists in the named `mongo_data` volume.
 
-Jenkins should check out this repository on an agent with Node.js/npm and Docker access. The pipeline installs from lockfiles, builds the client, and builds both container images. It does not publish images or deploy them: configure registry credentials and a deployment target in Jenkins before adding those steps, and store secrets in Jenkins Credentials rather than in the Jenkinsfile or repository.
+Jenkins should use a **Multibranch Pipeline** job pointed at this GitHub repository. Its Linux agent needs Node.js/npm, Docker Engine access, Docker Compose v2, and the Pipeline, Git, and Credentials Binding plugins. The pipeline installs from lockfiles, builds the client and both Docker images, then runs `docker compose up -d --build` for the `main` branch. That deploys to the Docker host used by the Jenkins agent; the app is served on port 8081 there.
+
+Before the first `main` build, add three Jenkins **Secret text** credentials with these IDs: `fixly-jwt-secret` (a long random JWT signing secret), `fixly-admin-email`, and `fixly-admin-password` (a unique strong password). The deployment stage writes them to a permission-restricted temporary `server/.env`, runs Compose, then removes the file. They are not stored in the Jenkinsfile or Git. Jenkins uses its Compose MongoDB service, so the app's database URI stays inside the Docker network. For production, restrict access to the Jenkins agent and use a managed database and secret store.
 
 ### Architecture
 
