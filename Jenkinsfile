@@ -6,6 +6,14 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    parameters {
+        booleanParam(
+            name: 'DEPLOY_TO_DOCKER',
+            defaultValue: false,
+            description: 'Deploy the main branch to this Jenkins agent using Docker Compose.'
+        )
+    }
+
     stages {
         stage('Install') {
             steps {
@@ -29,7 +37,10 @@ pipeline {
 
         stage('Deploy with Docker Compose') {
             when {
-                branch 'main'
+                allOf {
+                    branch 'main'
+                    expression { params.DEPLOY_TO_DOCKER }
+                }
             }
             steps {
                 withCredentials([
