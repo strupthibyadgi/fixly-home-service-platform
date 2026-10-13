@@ -28,7 +28,7 @@ For a new GitHub repository, create an empty repository, then from this project 
 
 ## Docker and Jenkins (DevOps submission)
 
-The repository includes `server/Dockerfile`, `client/Dockerfile`, `client/nginx.conf`, `docker-compose.yml`, and `Jenkinsfile`. Compose runs MongoDB, the Express API, and the built React site. Create `server/.env` as described above, then run `docker compose up --build`; open `http://localhost:8080` (the API is also available at `http://localhost:5001/api/health`). The Compose file overrides `MONGODB_URI` inside the API container to use the `mongo` service. MongoDB data persists in the named `mongo_data` volume.
+The repository includes `server/Dockerfile`, `client/Dockerfile`, `client/nginx.conf`, `docker-compose.yml`, and `Jenkinsfile`. Compose runs MongoDB, the Express API, and the built React site. Create `server/.env` as described above, then run `docker compose up --build`; open `http://localhost:8081` (the API is also available at `http://localhost:5001/api/health`). The Compose file overrides `MONGODB_URI` inside the API container to use the `mongo` service. MongoDB data persists in the named `mongo_data` volume.
 
 Jenkins should check out this repository on an agent with Node.js/npm and Docker access. The pipeline installs from lockfiles, builds the client, and builds both container images. It does not publish images or deploy them: configure registry credentials and a deployment target in Jenkins before adding those steps, and store secrets in Jenkins Credentials rather than in the Jenkinsfile or repository.
 

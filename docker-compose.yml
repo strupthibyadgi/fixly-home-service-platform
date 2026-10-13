@@ -19,7 +19,7 @@ services:
     environment:
       PORT: 5001
       MONGODB_URI: mongodb://mongo:27017/HomeServiceDB
-      CLIENT_URL: http://localhost:8080
+      CLIENT_URL: http://localhost:8081
     depends_on:
       mongo:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
     depends_on:
       - server
     ports:
-      - "8080:80"
+      - "8081:80"
 
 volumes:
   mongo_data:
